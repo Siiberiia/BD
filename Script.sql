@@ -1,6 +1,6 @@
 -- 1. Создание базы данных t01_library
 create  database t01_library;
-
+   
 -- 2. Создание таблицы author
 create table if not exists public.author (
     id serial primary key,
@@ -17,7 +17,7 @@ create table if not exists public.publishing_house (
 create table if not exists public.book (
     id serial primary key,
     title varchar not null,
-    author_id integer not null references public.author(id),
+    author_id integer not null,
     publishing_house_id integer not null,
     version varchar,
     publication_year integer,
@@ -35,11 +35,15 @@ create table if not exists public.reader (
     registration_date date not null);
 
 -- 6. Создание таблицы book_instance
+
+create type book_state as enum ('отличное', 'хорошее', 'удовлетворительное', 'ветхое', 'утеряна');
+create type book_status as enum ('в наличии', 'выдана', 'забронирована');
+
 create table if not exists public.book_instance (
     inventory_number varchar primary key,
     book_id integer not null,
-    state enum ('отличное', 'хорошее', 'удовлетворительное', 'ветхое', 'утеряна') not null,
-    status enum ('в наличии', 'выдана', 'забронирована') not null default 'в наличии',
+    state book_state not null,
+    status book_status not null default 'в наличии',
     section varchar not null,
     line varchar not null,
     bookshelf varchar not null,
