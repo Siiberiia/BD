@@ -1,0 +1,70 @@
+-- 1. Создание базы данных t01_library
+create  database t01_library;
+   
+-- 2. Создание таблицы author
+create table if not exists public.author (
+    id serial primary key,
+    last_name varchar not null,
+    first_name varchar not null);
+
+-- 3. Создание таблицы publishing_house
+create table if not exists public.publishing_house (
+    id serial primary key,
+    name varchar not null,
+    city varchar not null);
+
+-- 4. Создание таблицы book
+create table if not exists public.book (
+    id serial primary key,
+    title varchar not null,
+    author_id integer not null,
+    publishing_house_id integer not null,
+    version varchar,
+    publication_year integer,
+    circulation integer,  
+    foreign key (author_id) references public.author(id),
+    foreign key (publishing_house_id) references public.publishing_house(id));
+
+-- 5. Создание таблицы reader
+create table if not exists public.reader (
+    ticket_number serial primary key,
+    last_name varchar not null,
+    first_name varchar not null,
+    birth_date DATE not null,
+    gender varchar check  (gender in ('М', 'Ж','Attack Helicopter')),
+    registration_date date not null);
+
+-- 6. Создание таблицы book_instance
+
+create type book_state as enum ('отличное', 'хорошее', 'удовлетворительное', 'ветхое', 'утеряна');
+create type book_status as enum ('в наличии', 'выдана', 'забронирована');
+
+create table if not exists public.book_instance (
+    inventory_number varchar primary key,
+    book_id integer not null,
+    state book_state not null,
+    status book_status not null default 'в наличии',
+    section varchar not null,
+    line varchar not null,
+    bookshelf varchar not null,
+    foreign key (book_id) references public.book(id));
+
+-- 7. Создание таблицы issuance
+create table if not exists public.issuance (
+    reader_ticket_number integer not null,
+    book_instance_number varchar not null,
+    issue_datetime timestamp not null,
+    expected_return_date date not null,
+    actual_return_date date,
+    foreign key (reader_ticket_number) references public.reader(ticket_number),
+    foreign key (book_instance_number) references public.book_instance(inventory_number));
+
+-- 8. Создание таблицы booking
+create table if not exists public.booking (
+    booking_number serial primary key,
+    reader_ticket_number varchar not null,
+    book_id integer not null,
+    min_condition_level book_state not null,
+    booking_datetime timestamp not null,
+    foreign key (reader_ticket_number) references public.reader(ticket_number),
+    foreign key (book_id) references public.book(id));
